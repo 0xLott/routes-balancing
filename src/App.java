@@ -2,16 +2,19 @@ import java.util.List;
 
 public class App {
     public static void main(String[] args) {
-        int NUM_CAMINHOES = 6;
+        int NUM_CAMINHOES = 3;
+        int TAM_CONJUNTO = 10;
 
-        List<int[]> rotas = GeradorDeProblemas.geracaoDeRotas(10, 1, 1.0);
-        int[][] caminhoes = new int[NUM_CAMINHOES][rotas.get(0).length/NUM_CAMINHOES + rotas.get(0).length % 2 + 1];
-        Balancer.distribute(rotas.get(0), caminhoes);
+        for (int QTD_ROTAS = 6; QTD_ROTAS < 100; QTD_ROTAS++) {
+            System.out.println("\n----- QTD ROTAS: " + QTD_ROTAS + "-----");
+            List<int[]> rotas = GeradorDeProblemas.geracaoDeRotas(QTD_ROTAS, TAM_CONJUNTO, 0.75);
 
-//        int[] rotas = {30, 40, 30, 20, 20, 30, 40, 20, 40};
-//        int[][] caminhoes = new int[NUM_CAMINHOES][rotas.length/NUM_CAMINHOES + rotas.length % 2];
-//        Balancer.distribute(rotas, caminhoes);
+            for (int i = 0; i < TAM_CONJUNTO; i++) {
+                int rotasPorCaminhao = (rotas.get(i).length/NUM_CAMINHOES) + (rotas.get(i).length % 2);
+                int[][] caminhoes = new int[NUM_CAMINHOES][rotasPorCaminhao];
 
+                Balancer.distribute(rotas.get(i), caminhoes);
+            }
+        }
     }
-
 }
