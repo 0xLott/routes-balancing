@@ -7,11 +7,16 @@ public class Balancer {
         System.out.println("TARGET: " + target);
 
         // Se o balanceamento retornar rotas ainda não distribuídas, as distribui para o próximo caminhão
+        
         if (balance(routes, target, trucks).length != 0) {
-            System.out.println("Remaining routes:" + Arrays.toString(balance(routes, target, trucks)));
+            System.out.println("Remaining routes: " + Arrays.toString(balance(routes, target, trucks)));
         }
         else {
             // Pronto
+        }
+
+        for (int[] truck : trucks) {
+            System.out.println(Arrays.toString(truck));
         }
     }
 
@@ -176,11 +181,11 @@ public class Balancer {
 
 
         // Convert the list back to an array
-        int[] result = new int[truckRoutes.size()];
-        for (int i = 0; i < truckRoutes.size(); i++) {
-            result[i] = truckRoutes.get(i);
+//        int[] trucks[selectedTruckIndex] = new int[truckRoutes.size()];
+        for (int i = 0; i < truckRoutes.size() - 1; i++) {
+            trucks[selectedTruckIndex][i] = truckRoutes.get(i);
         }
 
-        System.out.println("Rotas atribuídas ao caminhão " + selectedTruckIndex + ": " + Arrays.toString(result));
+        System.out.println("Rotas atribuídas ao caminhão " + selectedTruckIndex + ": " + Arrays.toString(trucks[selectedTruckIndex]));
     }
 }
