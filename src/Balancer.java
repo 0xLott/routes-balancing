@@ -6,14 +6,16 @@ public class Balancer {
         int target = (Arrays.stream(routes).sum()) / trucks.length;
         System.out.println("TARGET: " + target);
 
-//        for (int[] truck : trucks) {
-//            balance(routes, target);
-//        }
-
-        balance(routes, target);
+        // Se o balanceamento retornar rotas ainda não distribuídas, as distribui para o próximo caminhão
+        if (balance(routes, target, trucks).length != 0) {
+            System.out.println("Remaining routes:" + Arrays.toString(balance(routes, target, trucks)));
+        }
+        else {
+            // Pronto
+        }
     }
 
-    public static int[] balance(int[] routes, int target) {
+    public static int[] balance(int[] routes, int target, int[][] trucks) {
         System.out.println("ROTAS:" + Arrays.toString(routes));
         int[][] splitted = split(routes);
         int[] remaining;
@@ -24,21 +26,24 @@ public class Balancer {
             int[] esq = splitted[0];
             int[] dir = splitted[1];
 
-            System.out.println("\t esq: " + Arrays.toString(esq));
-            System.out.println("\t dir: " + Arrays.toString(dir));
+//            System.out.println("\t esq: " + Arrays.toString(esq));
+//            System.out.println("\t dir: " + Arrays.toString(dir));
 
             int[] selected = findClosestCombination(esq, dir, target);
             System.out.println("Selected: " + Arrays.toString(selected));
 
+            int selectedTruckIndex = findNextTruck(trucks);
+            assignToTruck(selected, trucks, selectedTruckIndex);
+
             remaining = removeRoutes(esq, selected);
         } else {
-            int[] remainingLeft = balance(splitted[0], target);
-            int[] remainingRight = balance(splitted[1], target);
+            int[] remainingLeft = balance(splitted[0], target, trucks);
+            int[] remainingRight = balance(splitted[1], target, trucks);
 
             // Combine remaining routes from left and right subtrees
             remaining = mergeArrays(remainingLeft, remainingRight);
-            System.out.println("R"+ Arrays.toString(remaining));
         }
+
         return remaining;
     }
 
@@ -134,5 +139,48 @@ public class Balancer {
         }
 
         return merged;
+    }
+
+    public static int findNextTruck(int[][] trucks) {
+        int minSum = Integer.MAX_VALUE;
+        int selectedTruckIndex = -1;
+
+        for (int i = 0; i < trucks.length; i++) {
+            int sum = 0;
+            for (int j = 0; j < trucks[i].length; j++) {
+                sum += trucks[i][j];
+            }
+
+            if (sum < minSum) {
+                minSum = sum;
+                selectedTruckIndex = i;
+            }
+        }
+
+        return selectedTruckIndex;
+    }
+
+    public static void assignToTruck(int[] selectedRoutes, int[][] trucks,  int selectedTruckIndex) {
+
+        List<Integer> truckRoutes = new ArrayList<>();
+
+        // Convert the original array to a list to facilitate element addition
+        for (int route : trucks[selectedTruckIndex]) {
+            if (route != 0)
+                truckRoutes.add(route);
+        }
+
+        for (int selectedRoute : selectedRoutes) {
+            truckRoutes.add(selectedRoute);
+        }
+
+
+        // Convert the list back to an array
+        int[] result = new int[truckRoutes.size()];
+        for (int i = 0; i < truckRoutes.size(); i++) {
+            result[i] = truckRoutes.get(i);
+        }
+
+        System.out.println("Rotas atribuídas ao caminhão " + selectedTruckIndex + ": " + Arrays.toString(result));
     }
 }
