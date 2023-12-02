@@ -6,26 +6,39 @@ public class Balancer {
         int target = (Arrays.stream(routes).sum()) / trucks.length;
         System.out.println("TARGET: " + target);
 
+        int[] remainingRoutes = balance(routes, target, trucks);
+        System.out.println("Remaining 1: " + Arrays.toString(remainingRoutes));
+
         // Se o balanceamento retornar rotas ainda não distribuídas, as distribui para o próximo caminhão
-        
-        if (balance(routes, target, trucks).length != 0) {
-            System.out.println("Remaining routes: " + Arrays.toString(balance(routes, target, trucks)));
-        }
-        else {
-            // Pronto
+        if (remainingRoutes.length != 0) {
+            remainingRoutes = balance(routes, target, trucks);
+            assignToTruck(remainingRoutes, trucks, findNextTruck(trucks));
         }
 
-        for (int[] truck : trucks) {
-            System.out.println(Arrays.toString(truck));
+        for (int index = 0; index < trucks.length; index++) {
+            System.out.println("Caminhão " + index + ": " + Arrays.toString(trucks[index])
+                    + " - Total: " + Arrays.stream(trucks[index]).sum() + "km");
         }
     }
 
+    /**
+     * RECUSIVIDADE: "Quebra" o array em duas metades — a da direita e a da esquerda
+     * BASE: Quando a metade da direita tiver apenas um único elemento
+     *
+     * Realiza operações para encontrar a combinação, entre os elementos de ambas à metade, mais próxima ao valor alvo,
+     * atribuindo-a ao caminhão disponível mais adequado e removendo suas respectivas rotas do array original. Em
+     * seguida, combina os restantes das rotas e prossegue com a recursão até que o processamento seja concluído.
+     *
+     * @param routes Array de rotas a serem processadas, geradas a partir da classe `GeradorDeProblemas`
+     * @param target Valor alvo (ou "ideal") a ser aproximado na combinação de rotas
+     * @param trucks A matriz representando os caminhões e suas respectivas rotas
+     * @return Array contendo as rotas restantes após a atribuição aos caminhões
+     */
     public static int[] balance(int[] routes, int target, int[][] trucks) {
-        System.out.println("ROTAS:" + Arrays.toString(routes));
+        System.out.println("ROTAS: " + Arrays.toString(routes));
         int[][] splitted = split(routes);
         int[] remaining;
 
-        // Base: quando a metade da direita tiver apenas um elemento
         if (splitted[1].length == 1) {
 
             int[] esq = splitted[0];
@@ -41,33 +54,52 @@ public class Balancer {
             assignToTruck(selected, trucks, selectedTruckIndex);
 
             remaining = removeRoutes(esq, selected);
+
         } else {
             int[] remainingLeft = balance(splitted[0], target, trucks);
             int[] remainingRight = balance(splitted[1], target, trucks);
 
-            // Combine remaining routes from left and right subtrees
             remaining = mergeArrays(remainingLeft, remainingRight);
         }
 
         return remaining;
     }
 
+    /**
+     * Divide um array de inteiros em duas partes, dividindo-o ao meio. Se o array inicial tiver um número ímpar de
+     * posições, `arrayEsq` terá tamanho `mid + 1`. Caso contário, terá tamanho `mid + 0`. Portanto, o elemento extra de
+     * um array ímpar ficará sempre em `arrayEsq`.
+     *
+     * @return Uma matriz 2D contendo duas partes do array original dividido: a metade da esquerda e a metade da direita
+     */
     public static int[][] split(int[] array) {
         int mid = array.length / 2;
 
-        /*
-         * Se o array inicial tiver um número ímpar de posições, `arrayEsq` terá tamanho `mid + 1`. Caso contário, terá
-         * tamanho `mid + 0`. Portanto, o elemento extra de um array ímpar ficará sempre em `arrayEsq`.
-         */
-        int[] arrayEsq = new int[mid + array.length % 2];
+        int[] arrayEsq = new int[mid];
         int[] arrayDir = new int[mid];
 
-        System.arraycopy(array, 0, arrayEsq, 0, arrayEsq.length);
-        System.arraycopy(array, arrayEsq.length, arrayDir, 0, arrayDir.length);
+        System.arraycopy(array, 0, arrayEsq, 0, mid);
+        System.arraycopy(array, mid, arrayDir, 0, mid);
 
-        return new int[][]{arrayEsq, arrayDir};
+        // For odd lengths, add the remaining element to arrayEsq
+        if (array.length % 2 != 0) {
+            arrayEsq = Arrays.copyOf(arrayEsq, arrayEsq.length + 1);
+            arrayEsq[arrayEsq.length - 1] = array[array.length - 1];
+        }
+
+        return new int[][] { arrayEsq, arrayDir };
     }
 
+    /**
+     * Encontra todas as possíveis combinações entre os elementos dos arrays recebidos, calculando a soma de cada
+     * combinação. Em seguida, verifica qual combinação tem a menor diferença absoluta em relação ao valor alvo. Essa
+     * combinação é considerada a mais próxima.
+     *
+     * @param esq    Lista de inteiros representando a metade esquerda
+     * @param dir    Lista de inteiros representando a metade direita
+     * @param target Valor alvo (ou "ideal") a ser aproximado na combinação de rotas
+     * @return Array contendo os dois números cuja soma mais se aproxima do valor alvo
+     */
     public static int[] findClosestCombination(int[] esq, int[] dir, int target) {
         List<Integer> closestCombination = new ArrayList<>();
         int closestSum = Integer.MAX_VALUE;
@@ -94,17 +126,16 @@ public class Balancer {
         return result;
     }
 
-
     /**
-     * @param originalArray     Conjunto original de rotas
-     * @param selectedRoutes    Rotas selecionadas
+     * @param originalArray  Conjunto original de rotas
+     * @param selectedRoutes Rotas selecionadas
      * @return Array com os elementos originais que não estão presentes no array de rotas selecionadas, ou seja, as
      * rotas que não foram selecionadas.
      */
     public static int[] removeRoutes(int[] originalArray, int[] selectedRoutes) {
         List<Integer> remainingRoutes = new ArrayList<>();
 
-        // Convert the original array to a list to facilitate element removal
+        // Converte o array original em uma lista para facilitar remoção de elemento
         List<Integer> originalArrayList = new ArrayList<>();
         for (int value : originalArray) {
             originalArrayList.add(value);
@@ -123,7 +154,7 @@ public class Balancer {
             }
         }
 
-        // Convert the list back to an array
+        // Converte a lista de volta a um array
         int[] result = new int[remainingRoutes.size()];
         for (int i = 0; i < remainingRoutes.size(); i++) {
             result[i] = remainingRoutes.get(i);
@@ -165,27 +196,31 @@ public class Balancer {
         return selectedTruckIndex;
     }
 
-    public static void assignToTruck(int[] selectedRoutes, int[][] trucks,  int selectedTruckIndex) {
-
+    public static void assignToTruck(int[] selectedRoutes, int[][] trucks, int selectedTruckIndex) {
         List<Integer> truckRoutes = new ArrayList<>();
 
-        // Convert the original array to a list to facilitate element addition
+        // Converte o array original em uma lista para facilitar remoção de elemento
         for (int route : trucks[selectedTruckIndex]) {
             if (route != 0)
                 truckRoutes.add(route);
         }
 
+        // Adiciona as rotas selecionadas à lista truckRoutes
         for (int selectedRoute : selectedRoutes) {
             truckRoutes.add(selectedRoute);
         }
 
-
-        // Convert the list back to an array
-//        int[] trucks[selectedTruckIndex] = new int[truckRoutes.size()];
+        // Converte a lista de volta a um array
         for (int i = 0; i < truckRoutes.size() - 1; i++) {
             trucks[selectedTruckIndex][i] = truckRoutes.get(i);
         }
 
+        // Preenche as posições restantes, se houver, com 0
+        for (int i = truckRoutes.size() - 1; i < trucks[selectedTruckIndex].length; i++) {
+            trucks[selectedTruckIndex][i] = 0;
+        }
+
         System.out.println("Rotas atribuídas ao caminhão " + selectedTruckIndex + ": " + Arrays.toString(trucks[selectedTruckIndex]));
     }
+
 }
