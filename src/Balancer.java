@@ -3,7 +3,7 @@ import java.util.*;
 public class Balancer {
     public static void distribute(int[] routes, int[][] trucks) {
         int target = (Arrays.stream(routes).sum()) / trucks.length;
-        System.out.println("TARGET: " + target);
+//        System.out.println("TARGET: " + target);
 
         int[] remainingRoutes = balance(routes, target, trucks);
 
