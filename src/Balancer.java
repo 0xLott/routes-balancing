@@ -8,8 +8,10 @@ public class Balancer {
         int[] remainingRoutes = balance(routes, target, trucks);
 
         // Se o balanceamento retornar rotas ainda não distribuídas, as redistribui
-        if (remainingRoutes.length != 0) {
-            remainingRoutes = balance(routes, target, trucks);
+        for (int i = 0; i < remainingRoutes.length; i++) {
+            int[] temp = new int[]{remainingRoutes[i]};
+            System.out.println("R: " + Arrays.toString(temp) + "INDEX: " + findNextTruck(trucks));
+            assignToTruck(temp, trucks, findNextTruck(trucks));
         }
 
         for (int index = 0; index < trucks.length; index++) {
