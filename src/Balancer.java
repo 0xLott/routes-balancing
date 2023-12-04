@@ -3,14 +3,12 @@ import java.util.*;
 public class Balancer {
     public static void distribute(int[] routes, int[][] trucks) {
         int target = (Arrays.stream(routes).sum()) / trucks.length;
-//        System.out.println("TARGET: " + target);
 
         int[] remainingRoutes = balance(routes, target, trucks);
 
         // Se o balanceamento retornar rotas ainda não distribuídas, as redistribui
         for (int i = 0; i < remainingRoutes.length; i++) {
             int[] temp = new int[]{remainingRoutes[i]};
-            System.out.println("R: " + Arrays.toString(temp) + "INDEX: " + findNextTruck(trucks));
             assignToTruck(temp, trucks, findNextTruck(trucks));
         }
 
@@ -42,9 +40,6 @@ public class Balancer {
 
             int[] esq = splitted[0];
             int[] dir = splitted[1];
-
-//            System.out.println("\t esq: " + Arrays.toString(esq));
-//            System.out.println("\t dir: " + Arrays.toString(dir));
 
             int[] selected = findClosestCombination(esq, dir, target);
 //            System.out.println("Selected: " + Arrays.toString(selected));
