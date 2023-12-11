@@ -11,7 +11,7 @@ public class App {
             long inicioTeste = System.nanoTime();
 
             // Quantidade crescente de rotas
-            for (int QTD_ROTAS = 6; QTD_ROTAS < 11; QTD_ROTAS++) {
+            for (int QTD_ROTAS = 6; QTD_ROTAS < Integer.MAX_VALUE; QTD_ROTAS++) {
                 System.out.println("\n--------- QTD ROTAS: " + QTD_ROTAS + " ---------");
                 List<int[]> rotas = GeradorDeProblemas.geracaoDeRotas(QTD_ROTAS, TAM_CONJUNTO, 0.65);
 
